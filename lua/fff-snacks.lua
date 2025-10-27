@@ -38,9 +38,12 @@ local status_map = {
   staged_modified = "modified",
   staged_deleted = "deleted",
   ignored = "ignored",
+  unknown = "untracked",
+  -- clean and clear are intentionally unmapped so files with no git changes
+  -- fall through to the neutral "clean file" display (M.git_icons.clean)
+  -- rather than getting colored git status highlighting
   -- clean = "",
   -- clear = "",
-  unknown = "untracked",
 }
 
 --- Format git status using configurable icons
