@@ -2,6 +2,27 @@
 
 A [snacks.nvim](https://github.com/folke/snacks.nvim) source for [fff.nvim](https://github.com/dmtrKovalenko/fff.nvim).
 
+## Features
+
+- **Frecency-based file finding** - Leverages fff.nvim's Rust-powered frecency scoring
+- **Score display** - Shows frecency score for each file on the right side
+- **Flexible layouts** - Use built-in snacks.nvim presets or create custom layouts
+- **Git integration** - Visual git status indicators with colored icons
+
+### Picker Display
+
+Each file entry shows:
+- **Left**: Git status icon (defaults: M/A/D/R/?/!, space for clean files)
+- **Center**: Filename and directory path
+- **Right**: Frecency score (reflects access history and recency)
+
+Example (with default git letter icons):
+```
+M  filename.lua        common/.config/nvim       68
+?  new-file.ts         src/components            12
+   settings.json       common/.config            89
+```
+
 ## Installation
 
 ```lua
@@ -14,7 +35,10 @@ A [snacks.nvim](https://github.com/folke/snacks.nvim) source for [fff.nvim](http
   {
     "madmaxieee/fff-snacks.nvim",
     dependencies = { "dmtrKovalenko/fff.nvim", "folke/snacks.nvim" },
-    opts = {},
+    opts = {
+      -- Optional: customize git status icons
+      -- git_icons = { modified = "", clean = "" }
+    },
     keys = {
       { "<leader><leader>", "<CMD>FFFSnacks<CR>", desc = "FFF", }
     },
@@ -61,6 +85,26 @@ opts = {
   }
 }
 ```
+
+### Git Status Icons
+
+Customize the git status icons shown on the left side:
+
+```lua
+opts = {
+  git_icons = {
+    modified = "M",    -- or use nerd fonts like ""
+    added = "A",       -- or ""
+    deleted = "D",     -- or ""
+    renamed = "R",     -- or ""
+    untracked = "?",   -- or ""
+    ignored = "!",     -- or ""
+    clean = " ",       -- or "" for unchanged files
+  }
+}
+```
+
+**Defaults**: Uses standard git letters (M, A, D, R, ?, !, and space for clean files)
 
 ### Runtime Override
 

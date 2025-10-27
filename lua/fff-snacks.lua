@@ -10,6 +10,18 @@ local file_picker = require "fff.file_picker"
 ---@type FFFSnacksState
 M.state = { config = {} }
 
+--- Default git status icons (can be overridden in setup)
+---@type table<string, string>
+M.git_icons = {
+  modified = "M",
+  added = "A",
+  deleted = "D",
+  renamed = "R",
+  untracked = "?",
+  ignored = "!",
+  clean = " ",
+}
+
 local staged_status = {
   staged_new = true,
   staged_modified = true,
@@ -31,7 +43,7 @@ local status_map = {
   unknown = "untracked",
 }
 
---- tweaked version of `Snacks.picker.format.file_git_status`
+--- Format git status using configurable icons
 --- @type snacks.picker.format
 local function format_file_git_status(item, picker)
   local ret = {} ---@type snacks.picker.Highlight[]
@@ -46,23 +58,27 @@ local function format_file_git_status(item, picker)
     hl = "SnacksPickerGitStatus" .. status.status:sub(1, 1):upper() .. status.status:sub(2)
   end
 
-  local icon = picker.opts.icons.git[status.status]
-  if status.staged then
-    icon = picker.opts.icons.git.staged
+  -- Use configurable git icons
+  local icon
+  if status.status == "modified" then
+    icon = M.git_icons.modified
+  elseif status.status == "added" then
+    icon = M.git_icons.added
+  elseif status.status == "deleted" then
+    icon = M.git_icons.deleted
+  elseif status.status == "renamed" then
+    icon = M.git_icons.renamed
+  elseif status.status == "untracked" then
+    icon = M.git_icons.untracked
+  elseif status.status == "ignored" then
+    icon = M.git_icons.ignored
+  else
+    icon = M.git_icons.clean
   end
-
-  local text_icon = status.status:sub(1, 1):upper()
-  text_icon = status.status == "untracked" and "?" or status.status == "ignored" and "!" or text_icon
 
   ret[#ret + 1] = { icon, hl }
   ret[#ret + 1] = { " ", virtual = true }
 
-  ret[#ret + 1] = {
-    col = 0,
-    virt_text = { { text_icon, hl }, { " " } },
-    virt_text_pos = "right_align",
-    hl_mode = "combine",
-  }
   return ret
 end
 
@@ -102,7 +118,10 @@ M.source = {
 
     ---@type snacks.picker.finder.Item[]
     local items = {}
-    for _, fff_item in ipairs(fff_result) do
+    for idx, fff_item in ipairs(fff_result) do
+      -- Get score data from fff.nvim for this item
+      local score_data = file_picker.get_file_score(idx)
+
       ---@type snacks.picker.finder.Item
       local item = {
         text = fff_item.name,
@@ -115,6 +134,9 @@ M.source = {
           staged = staged_status[fff_item.git_status] or false,
           unmerged = fff_item.git_status == "unmerged",
         },
+        -- Attach fff-specific data for the format function
+        fff_item = fff_item,
+        fff_score = score_data,
       }
       items[#items + 1] = item
     end
@@ -133,7 +155,9 @@ M.source = {
     if item.status then
       vim.list_extend(ret, format_file_git_status(item, picker))
     else
-      ret[#ret + 1] = { "  ", virtual = true }
+      -- Show unchanged/clean file icon for consistent alignment
+      ret[#ret + 1] = { M.git_icons.clean, "Comment" }
+      ret[#ret + 1] = { " ", virtual = true }
     end
 
     vim.list_extend(ret, require("snacks").picker.format.filename(item, picker))
@@ -142,6 +166,21 @@ M.source = {
       require("snacks").picker.highlight.format(item, item.line, ret)
       table.insert(ret, { " " })
     end
+
+    -- Add right-aligned score information
+    if item.fff_item then
+      local fff_item = item.fff_item
+      local score_text = tostring(fff_item.total_frecency_score)
+
+      -- Right-align the score text
+      ret[#ret + 1] = {
+        col = 0,
+        virt_text = { { score_text, "Comment" } },
+        virt_text_pos = "right_align",
+        hl_mode = "combine",
+      }
+    end
+
     return ret
   end,
   on_close = function()
@@ -156,9 +195,16 @@ M.source = {
 }
 
 --- Setup the fff-snacks plugin
----@param opts? snacks.picker.Config Configuration options to customize the picker (e.g., layout, formatters, etc.)
+---@param opts? table Configuration options to customize the picker
+---@field git_icons? table<string, string> Custom git status icons
 function M.setup(opts)
   opts = opts or {}
+
+  -- Merge custom git icons if provided
+  if opts.git_icons then
+    M.git_icons = vim.tbl_deep_extend("force", M.git_icons, opts.git_icons)
+    opts.git_icons = nil -- Remove from opts so it doesn't get passed to snacks
+  end
 
   if Snacks and pcall(require, "snacks.picker") then
     -- Merge user options with base source definition
