@@ -3,15 +3,27 @@ local M = {}
 local conf = require "fff.conf"
 local file_picker = require "fff.file_picker"
 
----@class FFFSnacksState
+---@class fff-snacks.State
 ---@field current_file_cache? string
 ---@field config table FFF config
 
----@type FFFSnacksState
+---@type fff-snacks.State
 M.state = { config = {} }
 
+---@class fff-Snacks.GitIcons
+---@field modified? string Icon for modified files (default: "M")
+---@field added? string Icon for added/staged new files (default: "A")
+---@field deleted? string Icon for deleted files (default: "D")
+---@field renamed? string Icon for renamed files (default: "R")
+---@field untracked? string Icon for untracked files (default: "?")
+---@field ignored? string Icon for ignored files (default: "!")
+---@field clean? string Icon for clean/unchanged files (default: " ")
+
+---@class fff-snacks.Config: snacks.picker.Config
+---@field git_icons? fff-Snacks.GitIcons Custom git status icons
+
 --- Default git status icons (can be overridden in setup)
----@type table<string, string>
+---@type fff-Snacks.GitIcons
 M.git_icons = {
   modified = "M",
   added = "A",
@@ -48,7 +60,7 @@ local status_map = {
 
 --- Format git status using configurable icons
 --- @type snacks.picker.format
-local function format_file_git_status(item, picker)
+local function format_file_git_status(item)
   local ret = {} ---@type snacks.picker.Highlight[]
   local status = item.status
 
@@ -198,8 +210,7 @@ M.source = {
 }
 
 --- Setup the fff-snacks plugin
----@param opts? table Configuration options to customize the picker
----@field git_icons? table<string, string> Custom git status icons
+---@param opts? fff-snacks.Config Configuration options to customize the picker
 function M.setup(opts)
   opts = opts or {}
 

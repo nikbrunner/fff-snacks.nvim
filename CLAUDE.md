@@ -19,6 +19,7 @@ The plugin follows the snacks.nvim picker source pattern:
 ### Key Components
 
 **Finder Function** (lua/fff-snacks.lua:72-128)
+
 - Initializes fff file picker if needed
 - Manages current file caching for frecency calculations
 - Transforms fff search results into snacks picker items
@@ -26,6 +27,7 @@ The plugin follows the snacks.nvim picker source pattern:
 - Attaches score data from fff.nvim to each item for display
 
 **Format Function** (lua/fff-snacks.lua:146-180)
+
 - Handles git status highlighting using configurable `M.git_icons`
 - Shows clean file icon (default: space) for unchanged files for consistent alignment
 - Renders filename with appropriate highlights
@@ -33,6 +35,7 @@ The plugin follows the snacks.nvim picker source pattern:
 - Follows snacks.nvim highlighting conventions
 
 **Git Status Mapping**
+
 - `staged_status` table (line 13): Defines which fff git statuses are "staged"
 - `status_map` table (line 20): Maps fff status strings to snacks status strings
 - Custom formatter `format_file_git_status` (line 36): Handles status icons and highlight groups
@@ -44,6 +47,7 @@ The plugin follows the snacks.nvim picker source pattern:
 **Current File Caching**: The `current_file_cache` is initialized in the finder (not `on_show`) because finder is called before `on_show`. This cache is cleared in `on_close` to prevent stale data.
 
 **Score Display**: Each picker line shows a right-aligned frecency score from fff.nvim's scoring system. The score reflects file access history and recency, helping you quickly identify frequently used files.
+
 - Example line: ` M  filename.lua    common/.config/nvim    68`
 
 **Git Icons Configuration** (lua/fff-snacks.lua:13-23): Git status icons are configurable via `M.git_icons`. Defaults use standard git letters (M, A, D, R, ?, !, space). Users can override these in `setup({ git_icons = {...} })` to use nerd font icons or custom symbols.
@@ -61,6 +65,7 @@ Format Lua code according to .stylua.toml configuration (LuaJIT syntax, 120 colu
 ### Testing
 
 This plugin should be tested manually in Neovim with:
+
 1. fff.nvim installed and initialized
 2. snacks.nvim loaded
 3. Call `:FFFSnacks` or `Snacks.picker.fff()`
@@ -72,6 +77,7 @@ The plugin accepts any `snacks.picker.Config` options in the `setup()` function,
 ### Setup Configuration
 
 **Basic setup with options**:
+
 ```lua
 require("fff-snacks").setup({
   layout = "telescope",  -- Use built-in layout preset
@@ -88,6 +94,7 @@ require("fff-snacks").setup({
 Layouts can be specified in multiple ways:
 
 **Built-in preset names (string)**:
+
 ```lua
 {
   layout = "telescope"
@@ -98,6 +105,7 @@ Layouts can be specified in multiple ways:
 ```
 
 **Built-in preset with overrides**:
+
 ```lua
 {
   layout = { preset = "ivy", layout = { height = 0.5 } }
@@ -105,6 +113,7 @@ Layouts can be specified in multiple ways:
 ```
 
 **Custom layout configuration**:
+
 ```lua
 {
   layout = {
@@ -120,6 +129,7 @@ Layouts can be specified in multiple ways:
 ```
 
 **Dynamic layout function**:
+
 ```lua
 {
   -- Functions are re-evaluated on every picker invocation

@@ -12,11 +12,13 @@ A [snacks.nvim](https://github.com/folke/snacks.nvim) source for [fff.nvim](http
 ### Picker Display
 
 Each file entry shows:
+
 - **Left**: Git status icon (defaults: M/A/D/R/?/!, space for clean files)
 - **Center**: Filename and directory path
 - **Right**: Frecency score (reflects access history and recency)
 
 Example (with default git letter icons):
+
 ```
 M  filename.lua        common/.config/nvim       68
 ?  new-file.ts         src/components            12
@@ -25,6 +27,7 @@ M  filename.lua        common/.config/nvim       68
 
 ## Installation
 
+With [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 {
   {
@@ -35,10 +38,9 @@ M  filename.lua        common/.config/nvim       68
   {
     "madmaxieee/fff-snacks.nvim",
     dependencies = { "dmtrKovalenko/fff.nvim", "folke/snacks.nvim" },
-    opts = {
-      -- Optional: customize git status icons
-      -- git_icons = { modified = "", clean = "" }
-    },
+    ---@module "fff-snacks"
+    ---@type fff-snacks.Config
+    opts = {},
     keys = {
       { "<leader><leader>", "<CMD>FFFSnacks<CR>", desc = "FFF", }
     },
@@ -48,11 +50,14 @@ M  filename.lua        common/.config/nvim       68
 
 ## Configuration
 
-You can customize the picker by passing options to the `setup()` function. All `snacks.picker.Config` options are supported.
+You can customize the picker by passing options to the `setup()` function.  (`lazy.nvim` will handover `opts` to `setup()`)
+
+All `snacks.picker.Config` options are supported and extended with configurations for `fff-snacks.nvim`.
 
 ### Layout Options
 
 **Use a built-in preset**:
+
 ```lua
 opts = {
   -- @see ~/.local/share/nvim/lazy/snacks.nvim/lua/snacks/picker/config/layouts.lua
@@ -61,6 +66,7 @@ opts = {
 ```
 
 **Use a custom layout function**:
+
 ```lua
 opts = {
   -- When handing over a function, it will be re-evaluated on every call
@@ -72,6 +78,7 @@ opts = {
 ```
 
 **Use a custom layout configuration**:
+
 ```lua
 opts = {
   layout = {
@@ -84,6 +91,13 @@ opts = {
     }
   }
 }
+```
+
+You can override the layout when calling the picker:
+
+```lua
+-- Via Lua API with custom layout
+:lua Snacks.picker.fff({ layout = "telescope" })
 ```
 
 ### Git Status Icons
@@ -105,12 +119,3 @@ opts = {
 ```
 
 **Defaults**: Uses standard git letters (M, A, D, R, ?, !, and space for clean files)
-
-### Runtime Override
-
-You can override the layout when calling the picker:
-
-```lua
--- Via Lua API with custom layout
-:lua Snacks.picker.fff({ layout = "telescope" })
-```
