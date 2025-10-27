@@ -26,12 +26,13 @@ The plugin follows the snacks.nvim picker source pattern:
 - Maps fff git status strings to snacks status objects
 - Attaches score data from fff.nvim to each item for display
 
-**Format Function** (lua/fff-snacks.lua:146-180)
+**Format Function** (lua/fff-snacks.lua:190-248)
 
 - Handles git status highlighting using configurable `M.git_icons`
 - Shows clean file icon (default: space) for unchanged files for consistent alignment
 - Renders filename with appropriate highlights
-- Displays right-aligned frecency score for all files
+- Displays right-aligned frecency score with visual indicator (if enabled)
+- Visual indicators: 🔥 (hot), ⚡ (warm), ● (medium), ○ (cold)
 - Follows snacks.nvim highlighting conventions
 
 **Git Status Mapping**
@@ -50,7 +51,14 @@ The plugin follows the snacks.nvim picker source pattern:
 
 - Example line: ` M  filename.lua    common/.config/nvim    68`
 
-**Git Icons Configuration** (lua/fff-snacks.lua:13-23): Git status icons are configurable via `M.git_icons`. Defaults use standard git letters (M, A, D, R, ?, !, space). Users can override these in `setup({ git_icons = {...} })` to use nerd font icons or custom symbols.
+**Git Icons Configuration** (lua/fff-snacks.lua:13-20): Git status icons are configurable via `M.git_icons`. Defaults use standard git letters (M, A, D, R, ?, !, space). Users can override these in `setup({ git_icons = {...} })` to use nerd font icons or custom symbols.
+
+**Frecency Indicators Configuration** (lua/fff-snacks.lua:22-37): Visual indicators for file access frequency. Configurable via `M.frecency_indicators` with:
+- Icons: hot (🔥), warm (🧨), medium (💧), cold (space)
+- Thresholds: hot >= 50, warm >= 25, medium >= 10
+- Indicator appears after the score on the right side
+- Can be disabled or customized with different icons/thresholds
+- Example line with indicator: ` M  filename.lua    common/.config/nvim    68 🔥`
 
 ## Development Commands
 
@@ -72,7 +80,11 @@ This plugin should be tested manually in Neovim with:
 
 ## Configuration
 
-The plugin accepts any `snacks.picker.Config` options in the `setup()` function, allowing customization of layout, formatters, and other picker behavior.
+The plugin accepts a `fff-snacks.Config` in the `setup()` function, which extends `snacks.picker.Config` with additional options:
+- `git_icons`: `fff-Snacks.GitIcons` - Custom git status icon configuration
+- `frecency_indicators`: `fff-snacks.FrecencyIndicators` - Visual indicators for file access frequency
+
+Type definitions are available in lua/fff-snacks.lua (lines 13-37) for LSP autocomplete and type checking.
 
 ### Setup Configuration
 
@@ -84,6 +96,15 @@ require("fff-snacks").setup({
   git_icons = {
     modified = "",     -- Customize git status icons
     clean = "",        -- Icon for unchanged files
+  },
+  frecency_indicators = {
+    enabled = true,      -- Enable visual indicators
+    hot = "🔥",          -- Icon for highly accessed files
+    thresholds = {       -- Customize score thresholds
+      hot = 50,
+      warm = 30,
+      medium = 10,
+    }
   },
   -- Any other snacks.picker.Config options
 })

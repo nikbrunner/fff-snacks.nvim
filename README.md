@@ -5,9 +5,11 @@ A [snacks.nvim](https://github.com/folke/snacks.nvim) source for [fff.nvim](http
 ## Features
 
 - **Frecency-based file finding** - Leverages fff.nvim's Rust-powered frecency scoring
+- **Visual frecency indicators** - At-a-glance visual indicators (🔥⚡●○) showing file access frequency
 - **Score display** - Shows frecency score for each file on the right side
 - **Flexible layouts** - Use built-in snacks.nvim presets or create custom layouts
 - **Git integration** - Visual git status indicators with colored icons
+- **Highly customizable** - Configure git icons, frecency indicators, thresholds, and layouts
 
 ### Picker Display
 
@@ -17,13 +19,19 @@ Each file entry shows:
 - **Center**: Filename and directory path
 - **Right**: Frecency score (reflects access history and recency)
 
-Example (with default git letter icons):
+Example (with default icons and frecency indicators):
 
 ```
-M  filename.lua        common/.config/nvim       68
-?  new-file.ts         src/components            12
-   settings.json       common/.config            89
+M  filename.lua        common/.config/nvim      68 🔥
+?  new-file.ts         src/components           12
+   settings.json       common/.config           42 🧨
 ```
+
+**Frecency Indicators:**
+- 🔥 Hot (score >= 50) - Very frequently accessed files
+- 🧨 Warm (score >= 25) - Frequently accessed files
+- 💧 Medium (score >= 10) - Moderately accessed files
+- (space) Cold (score < 10) - Rarely accessed files
 
 ## Installation
 
@@ -119,3 +127,33 @@ opts = {
 ```
 
 **Defaults**: Uses standard git letters (M, A, D, R, ?, !, and space for clean files)
+
+### Frecency Indicators
+
+Customize the visual indicators that show how "hot" or frequently accessed files are:
+
+```lua
+opts = {
+  frecency_indicators = {
+    enabled = true,               -- Enable/disable indicators
+    hot = "🔥",
+    warm = "🧨",
+    medium = "💧",
+    cold = " ", -- Leave blank for no indicator
+    thresholds = {
+      hot = 50,                   -- Threshold for hot indicator
+      warm = 30,                  -- Threshold for warm indicator
+      medium = 10,                -- Threshold for medium indicator
+    }
+  }
+}
+```
+
+**Defaults**: 🔥/🧨/💧/(space) with thresholds at 50/25/10
+
+**Display**: Indicator appears after the score (e.g., `68 🔥`, `42 🧨`, `12 💧`)
+
+**Examples:**
+- Disable indicators: `frecency_indicators = { enabled = false }`
+- Use nerd font icons: `hot = "", warm = "", medium = "", cold = ""`
+- Adjust thresholds: `thresholds = { hot = 100, warm = 50, medium = 20 }`

@@ -19,8 +19,22 @@ M.state = { config = {} }
 ---@field ignored? string Icon for ignored files (default: "!")
 ---@field clean? string Icon for clean/unchanged files (default: " ")
 
+---@class fff-snacks.FrecencyThresholds
+---@field hot? number Threshold for hot indicator (default: 50)
+---@field warm? number Threshold for warm indicator (default: 30)
+---@field medium? number Threshold for medium indicator (default: 10)
+
+---@class fff-snacks.FrecencyIndicators
+---@field enabled? boolean Enable frecency indicators (default: true)
+---@field hot? string Icon for very high scores (default: "🔥")
+---@field warm? string Icon for high scores (default: "⚡")
+---@field medium? string Icon for medium scores (default: "●")
+---@field cold? string Icon for low scores (default: "○")
+---@field thresholds? fff-snacks.FrecencyThresholds Score thresholds
+
 ---@class fff-snacks.Config: snacks.picker.Config
 ---@field git_icons? fff-Snacks.GitIcons Custom git status icons
+---@field frecency_indicators? fff-snacks.FrecencyIndicators Visual indicators for frecency scores
 
 --- Default git status icons (can be overridden in setup)
 ---@type fff-Snacks.GitIcons
@@ -32,6 +46,21 @@ M.git_icons = {
   untracked = "?",
   ignored = "!",
   clean = " ",
+}
+
+--- Default frecency indicators (can be overridden in setup)
+---@type fff-snacks.FrecencyIndicators
+M.frecency_indicators = {
+  enabled = true,
+  hot = "🔥",
+  warm = "🧨",
+  medium = "💧",
+  cold = " ",
+  thresholds = {
+    hot = 50,
+    warm = 25,
+    medium = 10,
+  },
 }
 
 local staged_status = {
@@ -182,10 +211,29 @@ M.source = {
       table.insert(ret, { " " })
     end
 
-    -- Add right-aligned score information
+    -- Add right-aligned score information with frecency indicator
     if item.fff_item then
       local fff_item = item.fff_item
-      local score_text = tostring(fff_item.total_frecency_score)
+      local score = fff_item.total_frecency_score
+      local score_text = tostring(score)
+
+      -- Add frecency indicator if enabled
+      if M.frecency_indicators.enabled then
+        local indicator
+        local thresholds = M.frecency_indicators.thresholds
+
+        if score >= thresholds.hot then
+          indicator = M.frecency_indicators.hot
+        elseif score >= thresholds.warm then
+          indicator = M.frecency_indicators.warm
+        elseif score >= thresholds.medium then
+          indicator = M.frecency_indicators.medium
+        else
+          indicator = M.frecency_indicators.cold
+        end
+
+        score_text = score_text .. " " .. indicator
+      end
 
       -- Right-align the score text
       ret[#ret + 1] = {
@@ -218,6 +266,12 @@ function M.setup(opts)
   if opts.git_icons then
     M.git_icons = vim.tbl_deep_extend("force", M.git_icons, opts.git_icons)
     opts.git_icons = nil -- Remove from opts so it doesn't get passed to snacks
+  end
+
+  -- Merge custom frecency indicators if provided
+  if opts.frecency_indicators then
+    M.frecency_indicators = vim.tbl_deep_extend("force", M.frecency_indicators, opts.frecency_indicators)
+    opts.frecency_indicators = nil -- Remove from opts so it doesn't get passed to snacks
   end
 
   if Snacks and pcall(require, "snacks.picker") then
