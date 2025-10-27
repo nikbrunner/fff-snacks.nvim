@@ -155,14 +155,23 @@ M.source = {
   live = true,
 }
 
-function M.setup()
+--- Setup the fff-snacks plugin
+---@param opts? snacks.picker.Config Configuration options to customize the picker (e.g., layout, formatters, etc.)
+function M.setup(opts)
+  opts = opts or {}
+
   if Snacks and pcall(require, "snacks.picker") then
+    -- Merge user options with base source definition
+    local fff_source = vim.tbl_deep_extend("force", require("fff-snacks").source, opts)
     -- Users can call Snacks.picker.fff() after this
-    Snacks.picker.sources.fff = require("fff-snacks").source
+    Snacks.picker.sources.fff = fff_source
   end
+
   vim.api.nvim_create_user_command("FFFSnacks", function()
     if Snacks and pcall(require, "snacks.picker") then
-      Snacks.picker(require("fff-snacks").source)
+      -- Merge user options with base source definition
+      local fff_source = vim.tbl_deep_extend("force", require("fff-snacks").source, opts)
+      Snacks.picker(fff_source)
     else
       vim.notify("fff-sncaks: Snacks is not loaded", vim.log.levels.ERROR)
     end
