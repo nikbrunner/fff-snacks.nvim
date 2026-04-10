@@ -84,8 +84,7 @@ function M.setup(opts)
 
   -- Merge custom git icons if provided
   if opts.git_icons then
-    require("fff-snacks.find_files").git_icons =
-      vim.tbl_deep_extend("force", git_icons_defaults, opts.git_icons)
+    require("fff-snacks.find_files").git_icons = vim.tbl_deep_extend("force", git_icons_defaults, opts.git_icons)
     opts.git_icons = nil -- Remove from opts so it doesn't get passed to snacks
   end
 
