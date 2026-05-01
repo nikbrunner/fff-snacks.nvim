@@ -158,7 +158,13 @@ M.source = {
 
     ---@type snacks.picker.finder.Item[]
     local items = {}
+    local seen = {} ---@type table<string, boolean>
     for idx, fff_item in ipairs(fff_result) do
+      -- Skip duplicate files (fff.nvim may return the same path multiple times)
+      if seen[fff_item.relative_path] then
+        goto continue
+      end
+      seen[fff_item.relative_path] = true
       ---@type snacks.picker.finder.Item
       local item = {
         text = fff_item.name,
@@ -175,6 +181,7 @@ M.source = {
         fff_item = fff_item,
       }
       items[#items + 1] = item
+      ::continue::
     end
 
     return items
